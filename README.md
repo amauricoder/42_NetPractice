@@ -277,18 +277,220 @@ The destination default is equivalent to 0.0.0.0 /0, this will forward the packe
 ## Network information
 - interfaces A1 and B1 ips and masks have open field to change the values.
 - Host A routes have destination and next hop open fields to change the values.
+- Host B routes have destination filled as default and lock and next hop field open to change the value.
 - Interface R1 and R2 have locked ips and masks.
 
 ## Goal 1 : host Machine A needs to communicate with host The Mighty Router
+
+To make the host Machine A to communicate with the Mighty Router, we need to check in which interface of the router we are in touch. In this case, is the interface R1.
+
+Interface R1 have the Ip and submask fields filled and locked.
+The mask is 255.255.255.128 -> /25 in CIDR notation.
+The ip is 45.227.104.126.
+
+With this informations we know that Machine A needs to have the same mask as interface R1 and the IP needs to be inside the range of R1 ips.
+
+We also can know that the number of hosts on the network is 128. Because 2^7 = 128.
+Then, the range is 45.227.104.1 - 45.227.104.126 (Having in consideration the hosts and broadcast)
+
+Host A route
+We can define the destination as default, because there is only 1 route through which it can send its packets.
+The next hop address must be the IP address of the next router's interface on the packets' way.
+The next interface is Interface R1, with the IP address of 54.117.30.126. Note that the next interface is not Interface A1, since this is the sender's own interface.
+
+Doing this, we will solve this goal.
 
 ---
 
 ## Goal 2 : host Machine B needs to communicate with host The Mighty Router
 
+We will use the same logic as the exercise before.
+Interface R2 Has IP and Mask filled and locked.
+The mask is 255.255.192.0 -> /18 in CIDR notation.
+The IP is 170.71.188.254.
+
+With this informations we know that Machine B needs to have the same mask as interface R2 and the IP needs to be inside the range of R2 ips.
+
+We also can know that the number of hosts on the network is 128. Because 2^6 = 64.
+Then, the range is 170.71.188.193 - 170.71.188.254 (Having in consideration the hosts and broadcast).
+
+Host B route
+The destination is already filled with default.
+The next hop address must be the IP address of the next router's interface on the packets' way.
+The next interface is Interface R2, with the IP address of 170.71.188.254. Note that the next interface is not Interface B1, since this is the sender's own interface.
+
+Doing this, we will solve this goal.
+
 ---
 
 Goal 3 : host Machine A needs to communicate with host Machine B 
+Solving the 2 first goals will allow the communications between Machine A and Machine B.
 
 --
 
+## Exercise 6
+
+![Exercise 6](images/6.png)
+
+This exercise introduces internet.
+The internet operates similarly to a router, directing data between devices and networks. However, certain IP addresses are reserved for private use and cannot be used on the public internet. Here are the key ranges of reserved IP addresses:
+
+      192.168.0.0 - 192.168.255.255: This range includes 65,536 IP addresses and is commonly used in home networks.
+
+      172.16.0.0 - 172.31.255.255: This range provides 1,048,576 IP addresses and is often utilized by medium-sized networks.
+
+      10.0.0.0 - 10.255.255.255: This range offers 16,777,216 IP addresses and is frequently employed in larger networks.
+
+If a device's interface is connected to the internet, it **cannot** use these private IP addresses. Instead, it must use a public IP address to communicate over the internet.
+
+## Network information
+### internet
+- destination -> changeble.
+- next hop -> 163.172.250.12
+
+### interface R2
+- ip -> 163.172.250.12
+- submask -> 255.255.255.240 -> CIDR /28
+
+### router R
+- destination -> changeble
+- next hop -> 163.172.250.1
+
+### interface R1
+- ip -> Changeble
+- submask -> 255.255.255.128 -> CIDR /25
+
+### interface A1
+- ip -> 112.156.244.227
+- mask -> changeble
+
+### Host A route
+- destination -> changeble
+- next hop -> changeble
+
+Next hop of internet is already locked and filled, and matches it ip from interface R2.
+Then we need to configurate the destination of the internet, that in this case we need to send packages to host A.
+So, internet destination must match with the network of address of interface A1.
+A1 mask is changeble, than we can fill this with some easy calculation mask. 255.255.255.0 -> /24 -> This will give us a range of 255.
+
+Calculate internet address of a client:
+To calculate this, we need to transform the Interface A1 ip and mask to binary.
+
+`ip 112.156.244.227 -> 01110000.10011100.11110100.11100011`
+
+`mask 255.255.255.0 -> 11111111.11111111.11111111.00000000`
+
+Apply the Subnet Mask to the IP Address
+
+To find the **network address**, apply the subnet mask to the IP address using a bitwise **AND** operation.
+
+    1 AND 1 = 1
+    1 AND 0 = 0
+    0 AND 1 = 0
+    0 AND 0 = 0
+
+| **IP Address**        | `01110000.10011100.11110100.11100011` |
+|-----------------------|--------------------------------------|
+| **Subnet Mask**        | `11111111.11111111.11111111.00000000` |
+| **Network Address**    | `01110000.10011100.11110100.00000000` |
+
+#### 3. Convert the Result to Decimal (Network Address)
+
+Convert the binary result back to decimal:
+
+- `01110000` -> 112
+- `10011100` -> 156
+- `11110100` -> 244
+- `00000000` -> 0
+
+So, the **network address** (internet address of the client) is: **112.156.244.0**.
+
+#### 4. Possible Host Addresses
+
+Since we are using a `/24` subnet mask (255.255.255.0), there are 8 bits left for the host portion, allowing for a range of host addresses from **112.156.244.1** to **112.156.244.254**. 
+- The first address `112.156.244.0` is the **network address**.
+- The last address `112.156.244.255` is the **broadcast address**.
+
+Now, we need to finish configuring the routes.
+All the destinations (except for internet) will be the default.
+Host A next hop will be the next interface ip (R1).
+
+## Exercise 7
+
+![Exercise 7](images/7.png)
+
+This level introduces us to the concept of overlaps.
+Network overlap occurs when two or more IP address ranges (or subnets) share common addresses. This means that devices in different networks could have IP addresses that fall within the same range, leading to confusion for routers on how to properly route traffic. Essentially, an overlap happens when networks aren't correctly separated, causing ambiguity in IP assignments and routing.
+The IP address range of one network should not mix or share any addresses with the range of another network. These networks are kept apart by routers, which help manage and direct traffic between them. If the address ranges overlap, the router won't be able to clearly distinguish which network to send the data to.
+
+## Network information
+- 3 seperate networks
+- Host A to Router R1
+- Router R1 to Router R2
+- Router R2 to Host C
+
+- Interface R11 is alread filled with IP 93.198.14.1, because of this, we can't fill freely chose interface A1 ip.
+Now, imagine that we give a 255.255.255.0 /024 mas to A1 ip. Lets see the range:
+
+### Subnet Mask Details:
+- **Subnet Mask (Decimal):** - 255.255.255.0
+- **Subnet Mask (Binary):** - `11111111.11111111.11111111.00000000`
+- **CIDR Notation:** - /30
+- **Hosts** - 255 (w/ host and broadcast)
+
+| **Network Address** | **Broadcast Address** | **Usable IP Range**                |
+|---------------------|-----------------------|------------------------------------|
+| 93.198.14.0         | 93.198.14.255         | 93.198.14.1 - 93.198.14.254        |
+
+The IP of interface R12 is **93.198.14.254** and is filled and locked.
+So, because of this, we can't use a mask of /24, because it will overlap the range of interface R12.
+They would be both in the range of 93.198.14.0 - 93.198.14.255.
+Since we need IP addresses for 3 different networks, it's useful to divide the last part of the address into 4 or more smaller address groups. We achieve this by applying a subnet mask of /26 or greater. 
+For example, a /28 mask will create 16 smaller groups of addresses, and from these, we will use 3 specific ranges.
+
+### Subnet Mask Details:
+- **Subnet Mask (Decimal):** - 255.255.255.0
+- **Subnet Mask (Binary):** - `11111111.11111111.11111111.11110000`
+- **CIDR Notation:** - /28
+- **Hosts** - 16 (w/ host and broadcast)
+
+      93.198.14.1 - 93.198.14.14    (Host A to Router R1)
+      93.198.14.65 - 93.198.14.78   (Router R2 to Host C)
+      93.198.14.241 - 93.198.14.254 (Router R1 to Router R2)
+
+Useful link
+https://www.calculator.net/ip-subnet-calculator.html?cclass=any&csubnet=28&cip=93.198.14.2&ctype=ipv4&printit=0&x=97&y=13
+
+## Exercise 8
+
+![Exercise 8](images/8.png)
+
+## Network information
+- Cliente D and Client C needs to communicate between each other and to the internet.
+- We have the destiny of the internet filled and locked with ip 131.79.51.0 mask /26
+
+With this information, we can know that all networks must have 131.79.51.x with the range of 62 hosts(excluding network and broadcast)
+Then, we know that the internet will communicate with networks with the range of 131.79.51.0 to 131.79.51.63;
+But, we need to be careful for not occuring overlaps between the networks.
+- Interface D1 has the mask filled and locked 255.255.255.240 /28 , this told us that the networks can have 14 hosts(excluding network and broadcast).
+
+Knowing all this information, we know that the mask is manipulated and the network is splitted in 4.
+All the ips are between the range and we need to put any network in a range:
+
+|split| **Network Address** | **Broadcast Address** | **Usable IP Range**                |
+|------|---------------------|-----------------------|------------------------------------|
+|Host D to router| 131.79.51.0         | 131.79.51.15          | 131.79.51.1 - 131.79.51.14         |
+|HOST C to router| 131.79.51.16        | 131.79.51.31          | 131.79.51.17 - 131.79.51.30        |
+|router to router| 131.79.51.32        | 131.79.51.63          | 131.79.51.33 - 131.79.51.62        |
+|not used| 131.79.51.64        | 131.79.51.128         | 131.79.51.65 - 131.79.51.127       |
+
+- interface R12 ip is filled and locked. With this information we have the next hop of internet.
+
+Now all that we have to do is fill the networks with valid ips from the equivalent range.
+All the routes will be default(except for one) and the next hop will be the next interface, just like the other exercises.
+- the route from R1 needs to have a destination defined to the specific network that we want to send the packages, that is 131.79.51.0/24.
+
+## Exercise 9
+
+![Exercise 9](images/9.png)
 
