@@ -1,60 +1,47 @@
 # 42_NetPractice
-his document is a System Administration related exercise.
 
-## How to Calculate the Range in a Network
+This project involves configuring small networks. The document provides a concise explanation of how each exercise was solved.
 
-To calculate the **range** of a network (i.e., the range of valid IP addresses), you need two main pieces of information: the **IP address** and the **subnet mask**. Let’s use the example you provided, with the IP `104.99.23.240` and the subnet mask `255.255.255.0`.
-
-### Steps to Calculate the Network Range:
-
-#### 1. **Identify the Network and Host Portions:**
-   The subnet mask `255.255.255.0` (or `/24` in CIDR notation) indicates that the first **24 bits** of the IP are for the **network**, and the last **8 bits** are for the **hosts**.
-
-   - **IP in decimal**: `104.99.23.240`
-   - **Subnet mask in decimal**: `255.255.255.0`
-   - **IP in binary**: `01101000.01100011.00010111.11110000`
-   - **Mask in binary**: `11111111.11111111.11111111.00000000`
-
-   The subnet mask `255.255.255.0` means that the first three octets (`104.99.23`) represent the **network**, and the last octet (`240`) represents the **hosts**.
-
-#### 2. **Find the Network Address:**
-   The **network address** is obtained by performing a bitwise AND operation between the IP address and the subnet mask.
-
-   - **IP in binary**: `01101000.01100011.00010111.11110000`
-   - **Mask in binary**: `11111111.11111111.11111111.00000000`
-
-   Performing the AND operation:
-
-- 01101000.01100011.00010111.11110000 (IP)
-- AND
-- 11111111.11111111.11111111.00000000 (Máscara)
-- 01101000.01100011.00010111.00000000 (Resultado: 104.99.23.0)
+## Table of contents
+- [How to Use This Document](#how-to-use-this-document)
+- [Exercise 1](#exercise-1)
+- [Exercise 2](#exercise-2)
+- [Exercise 3](#exercise-3)
+- [Exercise 4](#exercise-4)
+- [Exercise 5](#exercise-5)
+- [Exercise 6](#exercise-6)
+- [Exercise 7](#exercise-7)
+- [Exercise 8](#exercise-8)
+- [Exercise 9](#exercise-9)
+- [Exercise 10](#exercise-10)
+- [License](#license)
 
 
-Therefore, the **network address** is `104.99.23.0`.
+## How to Use This Document
 
-#### 3. **Find the Broadcast Address:**
-The **broadcast address** is the last address in the network and is obtained by setting all the **host bits** to 1.
+To fully understand the explanations, please refer to the resources listed below. These materials provide essential background knowledge in subnetting, network concepts, and configuration techniques.
 
-- For a `/24` mask, the first 24 bits are for the network and the last 8 bits are for hosts.
-- The host portion in the broadcast address will be `11111111` (in binary), which is `255` in decimal.
+### Recommended Resources
 
-Therefore, the **broadcast address** is:
-- **Broadcast address**: `104.99.23.255`.
+1. **[You Suck at Subnetting - Playlist](https://www.youtube.com/watch?v=5WfiTHiU4x8&list=PLIhvC56v63IKrRHh3gvZZBAGvsvOhwrRF)**  
+   Created by [NetworkChuck](https://www.youtube.com/@NetworkChuck)  
+   This playlist offers a hands-on, beginner-friendly approach to subnetting concepts.
 
-#### 4. **Calculate the Usable IP Range:**
-The range of valid IP addresses (hosts) goes from the first IP **after the network address** to the last IP **before the broadcast address**.
+2. **[Redes - Playlist (Portuguese)](https://www.youtube.com/watch?v=dp9ynjJamoI&list=PLuf64C8sPVT_nObvAFU5W-SiE04ST-PlL&pp=iAQB)**  
+   Created by [Paulo Kretcheu](https://www.youtube.com/@kretcheu2001)  
+   This playlist covers networking fundamentals in Portuguese, making it a great resource for Portuguese speakers.
 
-- **First usable IP**: `104.99.23.1` (the next address after `104.99.23.0`).
-- **Last usable IP**: `104.99.23.254` (the address before the broadcast `104.99.23.255`).
+3. **[A Computer Networking Zine](https://jvns.ca/networking-zine.pdf)**  
+   By [Julia Evans](https://jvns.ca/)  
+   This zine provides a fun and visual approach to learning networking concepts, perfect for beginners and visual learners.
 
-### Summary of Results:
+4. **[Comprehensive Repository of Networking Concepts and Resources](https://github.com/zelhajou/42cursus-net_practice)**  
+   Created by [Zakaria Elhajoui](https://github.com/zelhajou)  
+   This repository includes an extensive collection of networking concepts and additional resources, making it an excellent reference for network practice.
 
-- **Network address**: `104.99.23.0`
-- **Broadcast address**: `104.99.23.255`
-- **Usable IP range**: from `104.99.23.1` to `104.99.23.254`
+---
 
-Thus, with the IP `104.99.23.240` and the subnet mask `255.255.255.0`, the range of usable IPs goes from `104.99.23.1` to `104.99.23.254`.
+Thank you to all the creators for contributing to the community and sharing knowledge.
 
 
 ## Exercise 1
@@ -494,3 +481,75 @@ All the routes will be default(except for one) and the next hop will be the next
 
 ![Exercise 9](images/9.png)
 
+## Network information
+Internet initially does not send packages to any specific network.
+The networks does not share a common addres range.
+For this reason, this exercise is very easy.
+
+The easiest way is to solve it goal by goal.
+#### Goal 1 : host meson needs to communicate with host ion
+- All the hosts needs to have the same subnet mask. We have one field locked and filled, then we share this
+subnet mask between all the hosts.
+- All the destinations can be set to default.
+- Then, we can choose a reasonable ip to this network and just change the host number.
+
+#### Goal 2 : host cation needs to communicate with host gluon
+- between gluon and the router, there is a mask filled and locked. We can share this to the other host on the network.
+- On gluon, we have algo the next hop filled and locked, then we know the ip that we need to have on the next interface. With this information, we can algo calculate the network range of the other host.
+- The destination on gluon can be setted to default
+- The R2, we need to put the next hop that is the next interface. For this, we can also chose an IP.
+- between cation and the router, we basically can define anything. Then you can chose something easy that won't 
+require any calculations.
+
+#### Goal 3 : host meson needs to communicate with host Internet
+- Just put the ip that you choose initially and put it as destination on internet.
+There is no need to calculate this, just put the ip open to all (ip.0/24). But if you want to
+calculate the network, you can do it by doing an AND bitwise operation.
+
+#### Goal 4 : host meson needs to communicate with host gluon
+- Meson network is already configured.
+- Then, we need to configure the path between meson to gluon.
+- Between interface R13 and R21, we have a submask filled and locked. We know that they need to have the same subnet mask, then we share between them. Doing this, we can chose the ip. We know that the range will be
+very short, because this is a mask .252. Then, we can chose and easy ip based on this information and our knowledge.
+
+#### Goal 5 : host ion needs to communicate with host cation
+- Configure the router R1 next hop with the next interface and the destination with the network address of the cation network. 
+
+#### Goal 6 : host cation needs to communicate with host Internet
+- Configure the internet next hop with the next interface and the destination with the network address of the cation network. 
+
+## Exercise 10
+
+![Exercise 10](images/10.png)
+
+# Network Configuration Explanation
+
+At this level, we have 4 distinct network connections:
+
+1. **Router R1 to Switch S1**
+2. **Router R1 to Router R2**
+3. **Router R2 to Client H4**
+4. **Router R2 to Client H3**
+
+## Step 1: Ensuring Internet Access to All Hosts
+The internet needs to reach all hosts, so its destination IP range should encompass all networks in the setup.
+
+Interfaces R11 and R13 already have assigned IPs, differing only in the last byte: Interface R11 ends in `.1`, while R13 ends in `.254`. To include this full IP range, we use a `/24` subnet mask for the internet destination, covering `134.97.142.0` to `134.97.142.255`.
+
+## Step 2: Choosing IP Ranges for Each Network
+When assigning IP addresses, two criteria are essential:
+
+1. The IP address must fall within the internet’s destination range.
+2. The IP ranges for each network should not overlap.
+
+Given the existing IP assignments (grayed out), here’s a breakdown of the ranges covered by each network:
+
+- **Router R1 to Switch S1:** Range `134.97.142.0 - 134.97.142.127` (using a `/25` mask)
+- **Router R2 to Client H4:** Range `134.97.142.128 - 134.97.142.191` (using a `/26` mask)
+- **Router R1 to Router R2:** Range `134.97.142.252 - 134.97.142.255` (using a `/30` mask)
+- **Router R2 to Client H3:** Currently unassigned (needs a specific mask)
+
+For the "Router R2 to Client H3" connection, we have the remaining IP range `134.97.142.192 - 134.97.142.251`. Any mask allowing two IPs within this range can be applied for Interface R22 and Interface R31.
+
+## License
+[View License](LICENSE)
